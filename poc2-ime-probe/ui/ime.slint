@@ -1,0 +1,57 @@
+// PoC2 UI — std-widgets 미사용(내장 요소만). TextInput 3개로 "후보창이 캐럿을 따라오는지"를 본다.
+export component ImeWindow inherits Window {
+    title: "PoC2 - Slint IME probe";
+    width: 860px;
+    height: 620px;
+    background: #0e0e12;
+
+    in-out property <string> in-top;
+    in-out property <string> in-middle;
+    in-out property <string> in-bottom;
+    in property <string> log-text;
+    in property <string> env-text;
+
+    callback note(string);
+
+    Text {
+        text: "위 입력창 (한글 입력 → 후보창이 이 위치를 따라오는지 확인)";
+        x: 20px; y: 14px; color: #c9c9d4; font-size: 13px;
+    }
+    TextInput {
+        x: 20px; y: 36px; width: 500px; height: 40px;
+        text: root.in-top;
+        edited(t) => { root.note("top edited: " + t); }
+        accepted() => { root.note("top accepted"); }
+    }
+
+    Text {
+        text: "중간 입력창 (아래/위로 캐럿이 이동할 때 후보창 위치 갱신 확인)";
+        x: 20px; y: 96px; color: #c9c9d4; font-size: 13px;
+    }
+    TextInput {
+        x: 20px; y: 118px; width: 500px; height: 40px;
+        text: root.in-middle;
+        edited(t) => { root.note("middle edited: " + t); }
+        accepted() => { root.note("middle accepted"); }
+    }
+
+    Text {
+        text: "아래 입력창 (조합 중 창 포커스 변경/마우스 클릭 실험용)";
+        x: 20px; y: 178px; color: #c9c9d4; font-size: 13px;
+    }
+    TextInput {
+        x: 20px; y: 200px; width: 500px; height: 40px;
+        text: root.in-bottom;
+        edited(t) => { root.note("bottom edited: " + t); }
+        accepted() => { root.note("bottom accepted"); }
+    }
+
+    Text { text: root.env-text; x: 20px; y: 258px; color: #f0c674; font-size: 12px; }
+
+    Text { text: "이벤트 로그 (조합 중간값이 text 로 들어오는지 판정)"; x: 20px; y: 292px; color: #c9c9d4; font-size: 13px; }
+    TextEdit {
+        x: 20px; y: 314px; width: 820px; height: 280px;
+        read-only: true;
+        text: root.log-text;
+    }
+}
