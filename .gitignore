@@ -1,0 +1,4 @@
+/target
+**/*.log
+**/*-report.txt
+**/poc3-report.json
