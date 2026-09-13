@@ -1,0 +1,36 @@
+// PoC1 UI — std-widgets 를 쓰지 않고 내장 요소만으로 구성(의존 최소화).
+export component AppWindow inherits Window {
+    title: "PoC1 - Slint + external wgpu texture";
+    width: 960px;
+    height: 700px;
+    background: #0e0e12;
+
+    in property <image> preview;
+    in property <string> status-text;
+    in property <string> metrics-text;
+
+    Image {
+        source: root.preview;
+        x: 20px;
+        y: 20px;
+        width: root.width - 40px;
+        height: root.height - 130px;
+    }
+
+    Text {
+        text: root.status-text;
+        x: 20px;
+        y: root.height - 96px;
+        color: #e8e8ee;
+        font-size: 14px;
+        wrap: word-wrap;
+    }
+
+    Text {
+        text: root.metrics-text;
+        x: 20px;
+        y: root.height - 56px;
+        color: #8be9a0;
+        font-size: 14px;
+    }
+}

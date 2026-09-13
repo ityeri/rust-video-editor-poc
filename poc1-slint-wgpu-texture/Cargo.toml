@@ -1,0 +1,20 @@
+[package]
+name = "poc1-slint-wgpu-texture"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Slint(wgpu backend) + external wgpu texture: device sharing and zero-copy display"
+
+[[bin]]
+name = "poc1-slint-wgpu-texture"
+path = "src/main.rs"
+
+[dependencies]
+slint.workspace = true
+pollster.workspace = true
+log.workspace = true
+env_logger.workspace = true
+
+[build-dependencies]
+slint-build.workspace = true
