@@ -1,0 +1,18 @@
+[package]
+name = "poc3-cubecl-wgpu-share"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "CubeCL on an app-owned wgpu device: sharing, correctness and interop cost"
+
+[[bin]]
+name = "poc3-cubecl-wgpu-share"
+path = "src/main.rs"
+
+[dependencies]
+cubecl.workspace = true
+wgpu.workspace = true
+pollster.workspace = true
+log.workspace = true
+env_logger.workspace = true
