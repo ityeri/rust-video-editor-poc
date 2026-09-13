@@ -94,3 +94,40 @@ PoC1/PoC2 는 Slint(winit + femtovg-wgpu) 때문에 플랫폼별 dev 패키지�
 - Windows: MSVC Build Tools (winget: `Microsoft.VisualStudio.2022.BuildTools`)
 
 GPU 드라이버/런타임: Windows=최신 GPU 드라이버, Linux=Vulkan 로더 + 드라이버(Mesa/NVIDIA), macOS=내장(Metal).
+
+## 5. 컴파일 검증 2차 시도 (2026-09-13, 컨테이너 재시작 이후)
+
+재시작 후에도 검증을 포기하지 않고 시도한 기록과 **재사용 가능한 발견**을 남긴다.
+
+### 발견 1 — `wgpu-hal` 은 C 컴파일러를 요구한다 (재사용 가능)
+
+```
+error: linker `cc` not found
+  = note: No such file or directory (os error 2)
+error: could not compile `wgpu-hal` (build script) due to 1 previous error
+```
+
+→ **최소 이미지/CI 환경에서 Rust wgpu 빌드는 실패한다.** 로컬 Linux 에서도 `gcc`(build-essential) 없으면
+WGPU/슬린트/CubeCL 어느 것을 쓰든 빌드가 막힌다. README 전제조건에 명시했다.
+
+### 발견 2 — 환경을 부트스트랩하면 어디까지 가는가 (참고 기록)
+
+컨테이너에서 `cc` 가 사라진 상태였기에 Alpine 3.24 패키지에서 툴체인을 추출해 구성했다:
+`gcc 15.2.0 + binutils + musl-dev + libgcc + gmp + mpfr4 + mpc1 + isl26 + jansson + zstd + fortify-headers`.
+추출 경로가 `/usr` 가 아니므로 `COMPILER_PATH`/`LIBRARY_PATH`/`C_INCLUDE_PATH` 로 우회했고,
+알파인 패키지에 없는 `crtbeginS.o`/`libgcc.a` 는 빈 PIC 오브젝트/빈 아카이브로 대체했다.
+
+그 결과:
+- C 컴파일/링크/정적 라이브러리 생성 동작 확인
+- **`cubecl-macros-internal`(proc-macro) 빌드 성공 = CubeCL 의 `#[cube]` 매크로가 로드되어 실행됨**
+- `target/debug/deps/*.rmeta` **169개** 생성(cubecl-core / cubecl-ir / naga / bytemuck 등 다수 통과)
+
+그러나 rustc 가 큰 크레이트에서 **SIGSEGV(signal 11)** 로 반복 중단되었다:
+`cubecl-ir` 1회, `zerocopy` 1회(debuginfo=0 으로 재시도해도 동일).
+
+### 결론
+
+이 부트스트랩은 **지원되는 구성이 아니며**(libgcc_s/unwinder 조합이 툴체인과 정합하지 않음),
+이 환경에서 Rust 컴파일 검증을 완료할 수 없다.
+→ **"코드가 컴파일된다"는 여전히 미검증**이며, 사용자 로컬에서 `cargo build` 로 확인해야 한다.
+컴파일 오류가 나오면 메시지를 그대로 전달하면 즉시 수정한다(3절의 위험 지점 목록 참조).

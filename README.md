@@ -71,3 +71,14 @@ cargo run --release -p poc3-cubecl-wgpu-share -- --device cpu      # GPU 없는 
   다른 디바이스의 텍스처를 샘플링하는 순간 wgpu validation error 가 발생한다.
 - Slint는 dirty-tracking 렌더러라 **외부 텍스처 내용만 바뀌어도 자동 재렌더되지 않을 수 있다**.
   PoC1 은 `Window::request_redraw()` 를 매 프레임 호출해 이 문제를 명시적으로 다룬다(중요한 실무 함정).
+
+## 빌드 전제: C 컴파일러가 필요합니다
+
+`wgpu-hal` 의 빌드 스크립트가 C 컴파일러(`cc`)를 호출한다. 다음 환경에서는 **`cc` 없이 빌드가 실패**한다
+(`error: linker 'cc' not found`).
+
+- 최소 컨테이너 이미지(alpine/busybox, distroless, CI 러너 축소 이미지)
+- dev 패키지를 설치하지 않은 Linux
+
+해결: Debian/Ubuntu `apt install build-essential pkg-config ...`, Fedora `dnf groupinstall "Development Tools"`,
+alpine `apk add build-base pkgconf ...`. `docs/verification.md` 4절에 플랫폼별 패키지 목록이 있다.
